@@ -1,12 +1,25 @@
 #pragma once
 
 #include "byte_stream.hh"
-
+#include <set>
+#include <vector> 
+struct Interval{
+public:
+	uint64_t start;
+	uint64_t end;
+	std::string data;
+	bool operator<(const Interval& other) const{
+		if(other.start==start){
+			return end<other.end;
+		}
+		return start<other.start;
+	}
+};
 class Reassembler
 {
 public:
   // Construct Reassembler to write into given ByteStream.
-  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ) {}
+  explicit Reassembler( ByteStream&& output ) : output_( std::move( output ) ){}
 
   /*
    * Insert a new substring to be reassembled into a ByteStream.
@@ -42,4 +55,8 @@ public:
 
 private:
   ByteStream output_; // the Reassembler writes to this ByteStream
-};
+  std::set<Interval> buf_{};
+  uint64_t next_expected_idx=0;
+  uint64_t eof_idx=UINT64_MAX;
+}; 
+
