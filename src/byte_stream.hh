@@ -52,6 +52,8 @@ public:
   bool is_finished() const;        // Is the stream finished (closed and fully popped)?
   uint64_t bytes_buffered() const; // Number of bytes currently buffered (pushed and not popped)
   uint64_t bytes_popped() const;   // Total number of bytes cumulatively popped from stream
+  void set_error_r(){set_error();};
+  bool has_error_r() const {return has_error();};
 };
 
 /*
