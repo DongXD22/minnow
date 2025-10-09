@@ -5,7 +5,7 @@ using namespace std;
 void Reassembler::insert( uint64_t first_index, string data, bool is_last_substring )
 {
   // Your code here.
-	uint64_t win_start=next_expected_idx;
+	uint64_t win_start=next_expected_idx_;
 	uint64_t win_end=win_start+output_.writer().available_capacity();
 	uint64_t cur_start=first_index;
 	uint64_t cur_end=cur_start+data.length();
@@ -16,15 +16,15 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
 	if(cur_start>win_end){
 		return;
 	}
-
+	if(next_expected_idx_==eof_idx){
+		output_.writer().close();
+	}
+	
 	uint64_t start_idx=max(cur_start,win_start);
 	uint64_t end_idx=min(cur_end,win_end);
-	if (end_idx <= start_idx) {
-		if (is_last_substring) {
-			output_.writer().close();
-		}
-		return;
-	}
+	
+	if (end_idx <= start_idx) return;
+
 	uint64_t len=end_idx-start_idx;
 	data=data.substr(start_idx-cur_start,len);
 	buf_.insert({start_idx,end_idx,data});
@@ -54,12 +54,12 @@ void Reassembler::insert( uint64_t first_index, string data, bool is_last_substr
 	}
 
 	it=buf_.begin();
-	while(it->start==next_expected_idx){
+	while(it->start==next_expected_idx_){
 		output_.writer().push(it->data);
-		next_expected_idx=it->end;
+		next_expected_idx_=it->end;
 		it=buf_.erase(it);
 	}
-	if(next_expected_idx==eof_idx){
+	if(next_expected_idx_==eof_idx){
 		output_.writer().close();
 	}
 

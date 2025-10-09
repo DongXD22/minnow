@@ -52,11 +52,11 @@ public:
 
   // Access output stream writer, but const-only (can't write from outside)
   const Writer& writer() const { return output_.writer(); }
-
+  uint64_t next_expected_idx() const {return next_expected_idx_;};
 private:
   ByteStream output_; // the Reassembler writes to this ByteStream
   std::set<Interval> buf_{};
-  uint64_t next_expected_idx=0;
+  uint64_t next_expected_idx_=0;
   uint64_t eof_idx=UINT64_MAX;
 }; 
 
