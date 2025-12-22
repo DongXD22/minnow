@@ -3,6 +3,7 @@
 #include "reassembler.hh"
 #include "tcp_receiver_message.hh"
 #include "tcp_sender_message.hh"
+//
 
 class TCPReceiver
 {
@@ -24,7 +25,12 @@ public:
   Reader& reader() { return reassembler_.reader(); }
   const Reader& reader() const { return reassembler_.reader(); }
   const Writer& writer() const { return reassembler_.writer(); }
+  uint16_t window_size() const;
 
 private:
   Reassembler reassembler_;
+  bool RST{0};
+  Wrap32 zero_point_{0};
+  bool started_{0};
+
 };
