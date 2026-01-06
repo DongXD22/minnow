@@ -11,12 +11,40 @@
 #include <optional>
 #include <queue>
 
+class Timer
+{
+public:
+
+  void time_pass(uint64_t time){ if(started_) time_+=time; }
+
+  bool ring() const { return time_>=valid_time_&&started_; }
+
+  bool started() const { return started_; }
+
+  void start(uint64_t RTO) { 
+    time_=0;
+    started_=true;
+    valid_time_=RTO;
+  }
+
+  void close() { 
+    started_=false; 
+    time_=0;
+  }
+
+private:
+  uint64_t valid_time_{0};
+  bool started_{false};
+  uint64_t time_{0};
+};
+
 class TCPSender
 {
+friend class Wrap32;
 public:
   /* Construct TCP sender with given default Retransmission Timeout and possible ISN */
   TCPSender( ByteStream&& input, Wrap32 isn, uint64_t initial_RTO_ms )
-    : input_( std::move( input ) ), isn_( isn ), initial_RTO_ms_( initial_RTO_ms )
+    : input_( std::move( input ) ), isn_( isn ), initial_RTO_ms_( initial_RTO_ms ),RTO_(initial_RTO_ms)
   {}
 
   /* Generate an empty TCPSenderMessage */
@@ -42,10 +70,22 @@ public:
 
   // Access input stream reader, but const-only (can't read from outside)
   const Reader& reader() const { return input_.reader(); }
+  Reader& reader() { return input_.reader(); }
 
 private:
   // Variables initialized in constructor
   ByteStream input_;
   Wrap32 isn_;
   uint64_t initial_RTO_ms_;
+  uint64_t RTO_;
+  Timer timer_{};
+  uint64_t retrans_timers_{0};
+  uint16_t window_size_{1};
+  bool syn_sent_{false};
+  bool fin_sent_{false};
+  uint64_t next_abs_seqno_{0};
+  uint64_t last_ackno_ {0};
+  std::queue<TCPSenderMessage> msgs_unchecked_{};
+  uint16_t msgs_unchecked_size_{0};
 };
+
