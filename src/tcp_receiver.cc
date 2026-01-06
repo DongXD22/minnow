@@ -14,10 +14,11 @@ void TCPReceiver::receive( TCPSenderMessage message )
   }
   if(!started_) return;
   reassembler_.insert(
-  message.seqno.unwrap(zero_point_,reassembler_.next_expected_idx())
-  -!message.SYN,
-  message.payload,
-  message.FIN);
+    message.seqno.unwrap(zero_point_,reassembler_.next_expected_idx())
+    -!message.SYN,
+    message.payload,
+    message.FIN
+  );
 }
 
 TCPReceiverMessage TCPReceiver::send() const
